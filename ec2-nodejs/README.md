@@ -138,6 +138,7 @@ server {
 * restart nginx and reload it 
 
 ```
+sudo apt-get update -y
 sudo systemctl restart nginx
 sudo systemctl reload nginx
 sudo systemctl status nginx
@@ -175,14 +176,27 @@ npm i -g pm2
 To start your server, simply use pm2 to execute index.js.
 
 ```shell
-pm2 start server/index.js
+pm2 start server/index.js --name "nodejs"
 ```
-To make sure that your PM2 restarts when your server restarts
+┌────────┬────┬──────┬────────┬───┬─────┬───────────┐
+│ Name   │ id │ mode │ status │ ↺ │ cpu │ memory    │
+├────────┼────┼──────┼────────┼───┼─────┼───────────┤
+│ nodejs │ 0  │ fork │ online │ 0 │ 0%  │ 22.4 MB   │
+└────────┴────┴──────┴────────┴───┴─────┴───────────┘
 
-```shell
-pm2 startup
+Running PM2 as a service
+
+After running the code above, it is recommended that you setup PM2 as a service so that it can start when the server starts.
+
 ```
-This will print out a line of code you need to run depending on the server you are using. Run the code it outputs.
+env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
+```
+To setup the Startup Script, copy/paste the following command:
+
+```
+sudo env PATH=$PATH:/home/ubuntu/.nvm/versions/node/v8.16.1/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu
+```
+change the node version if otherthen v8.16.1
 
 Finally, save the current running processes so they are run when PM2 restarts.
 
@@ -191,4 +205,23 @@ pm2 save
 ```
 That’s it! You can log out/in to SSH, even restart your server and it will continue to run on port 80.
 
+List running pm2
+```
+ pm2 ls
+```
+┌────────┬────┬──────┬────────┬───┬─────┬───────────┐
+│ Name   │ id │ mode │ status │ ↺ │ cpu │ memory    │
+├────────┼────┼──────┼────────┼───┼─────┼───────────┤
+│ nodejs │ 0  │ fork │ online │ 0 │ 0%  │ 41.3 MB   │
+└────────┴────┴──────┴────────┴───┴─────┴───────────┘
 
+restart running pm2 by name
+
+```
+pm2 restart nodejs
+```
+┌────────┬────┬──────┬────────┬───┬─────┬───────────┐
+│ Name   │ id │ mode │ status │ ↺ │ cpu │ memory    │
+├────────┼────┼──────┼────────┼───┼─────┼───────────┤
+│ nodejs │ 0  │ fork │ online │ 1 │ 0%  │ 15.2 MB   │
+└────────┴────┴──────┴────────┴───┴─────┴───────────┘
